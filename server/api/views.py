@@ -1,11 +1,13 @@
 from django.http import JsonResponse
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from .models import Task
 import json
 
-@csrf_exempt
-def create_task(request):
-    if request.method == 'POST':
+@method_decorator(csrf_exempt, name='dispatch')
+class TaskCreateView(View):
+    def post(self, request):
         data = json.loads(request.body)
         task = Task.objects.create(
             title=data['title'],
@@ -14,7 +16,6 @@ def create_task(request):
             due_date=data['due_date'],
             priority=data['priority']
         )
-
         return JsonResponse({
             'id': task.id,
             'title': task.title,
@@ -26,14 +27,13 @@ def create_task(request):
             'updated_at': task.updated_at
         }, status=201)
 
-@csrf_exempt
-def get_all_task(request):
-    if request.method == 'GET':
-        task = Task.objects.all()
-        return JsonResponse(list(task.values()), safe=False)
+class TaskListView(View):
+    def get(self, request):
+        tasks = Task.objects.all()
+        return JsonResponse(list(tasks.values()), safe=False)
 
-def get_single_task(request, id):
-    if request.method == 'GET':
+class TaskDetailView(View):
+    def get(self, request, id):
         task = Task.objects.get(id=id)
         return JsonResponse({
             'id': task.id,
@@ -46,9 +46,8 @@ def get_single_task(request, id):
             'updated_at': task.updated_at
         }, status=200)
 
-@csrf_exempt
-def update_task(request, id):
-    if request.method == 'PUT':
+    @method_decorator(csrf_exempt)
+    def put(self, request, id):
         task = Task.objects.get(id=id)
         data = json.loads(request.body)
 
@@ -64,12 +63,10 @@ def update_task(request, id):
             task.priority = data['priority']
 
         task.save()
-        return JsonResponse({'message': 'Task was updated successfully!'}, status=200)
+        return JsonResponse({'message': 'Task updated successfully!'}, status=200)
 
-@csrf_exempt
-def delete_task(request, id):
-    if request.method == 'DELETE':
+    @method_decorator(csrf_exempt)
+    def delete(self, request, id):
         task = Task.objects.get(id=id)
         task.delete()
-
-        return JsonResponse({'message': 'Task was deleted successfully!'}, status=204)
+        return JsonResponse({'message': 'Task deleted successfully!'}, status=204)
