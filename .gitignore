@@ -1,3 +1,6 @@
 # Python related
 .venv/
 __pycache__/
+
+# Project related
+db.sqlite3
