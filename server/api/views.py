@@ -25,3 +25,23 @@ def create_task(request):
             'created_at': task.created_at,
             'updated_at': task.updated_at
         }, status=201)
+
+@csrf_exempt
+def get_all_task(request):
+    if request.method == 'GET':
+        task = Task.objects.all()
+        return JsonResponse(list(task.values()), safe=False)
+
+def get_single_task(request, id):
+    if request.method == 'GET':
+        task = Task.objects.get(id=id)
+        return JsonResponse({
+            'id': task.id,
+            'title': task.title,
+            'description': task.description,
+            'is_completed': task.is_completed,
+            'due_date': task.due_date,
+            'priority': task.priority,
+            'created_at': task.created_at,
+            'updated_at': task.updated_at
+        })
