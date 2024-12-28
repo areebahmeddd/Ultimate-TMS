@@ -44,4 +44,32 @@ def get_single_task(request, id):
             'priority': task.priority,
             'created_at': task.created_at,
             'updated_at': task.updated_at
-        })
+        }, status=200)
+
+@csrf_exempt
+def update_task(request, id):
+    if request.method == 'PUT':
+        task = Task.objects.get(id=id)
+        data = json.loads(request.body)
+
+        if 'title' in data:
+            task.title = data['title']
+        if 'description' in data:
+            task.description = data['description']
+        if 'is_completed' in data:
+            task.is_completed = data['is_completed']
+        if 'due_date' in data:
+            task.due_date = data['due_date']
+        if 'priority' in data:
+            task.priority = data['priority']
+
+        task.save()
+        return JsonResponse({'message': 'Task was updated successfully!'}, status=200)
+
+@csrf_exempt
+def delete_task(request, id):
+    if request.method == 'DELETE':
+        task = Task.objects.get(id=id)
+        task.delete()
+
+        return JsonResponse({'message': 'Task was deleted successfully!'}, status=204)
